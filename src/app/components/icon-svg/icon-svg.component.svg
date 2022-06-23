@@ -1,0 +1,8 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  [attr.viewBox]="icon.viewBox"
+
+>
+  <path *ngFor="let dots of icon.dots" [attr.fill]="color" [attr.d]="dots"
+  />
+</svg>

@@ -1,0 +1,180 @@
+<div class="main">
+  <div class="left-panel">
+    <div class="gridster">
+      <gridster [options]="options">
+        <gridster-item [item]="item" *ngFor="let item of dashboard">
+          <div
+            [ngStyle]="{
+          'background':
+          item['color'] ?
+            item['color'].length === 1 ? item['color'][0] : 'linear-gradient(138.41deg, '+item['color'][0]+' -0.17%, '+item['color'][1]+' 92.09%)':
+            '',
+            'font-size': (((item.cols + item.rows) / 2) * 14) + 'px'
+        }"
+            [class.edited]="item === activeCard && isEditMode" class="item"
+          >
+            <div class="icon-wrapper">
+              <div *ngIf="getIcon(item['iconName'])" class="icon">
+                <app-icon-svg [color]="item['contentColor'][0]"  [icon]="getIcon(item['iconName'])"></app-icon-svg>
+              </div>
+            </div>
+            <div [ngStyle]="{
+                'color': item['contentColor'][0]
+              }"
+             *ngIf="getIcon(item['iconName'])" class="icon-text"
+            >
+              {{getIcon(item['iconName']).name}}
+            </div>
+            <div
+              [class]="item['textPosition'] ? item['textPosition'] : 'top_left'"
+              [ngStyle]="{
+                'color': item['contentColor'][0],
+                'font-size': activeCard && activeCard['textFontSize'] ? activeCard['textFontSize'] : + '16px'
+              }"
+              class="text"
+            >
+              {{item['text']}}
+            </div>
+            <div class="delete"
+             (mousedown)="removeItem($event, item)"
+             (touchstart)="removeItem($event, item)"
+            ><div class="icon"></div></div>
+            <div class="edit"
+             (mousedown)="editItem($event, item)"
+             (touchstart)="editItem($event, item)"
+            >
+              <div class="icon"></div>
+            </div>
+          </div>
+        </gridster-item>
+      </gridster>
+      <app-clip-svg [polygons]="dashboard"></app-clip-svg>
+      <img class="clip-svg" src="../assets/bg.jpg">
+    </div>
+
+  </div>
+  <div class="right-panel">
+    <div *ngIf="activeCard && isNewCard" class="icons">
+      <div (click)="setIcon(iName)" class="icon" *ngFor="let iName of iconNames">
+        <app-icon-svg [icon]="iconsStore[iName]" ></app-icon-svg>
+        <div class="text">{{iconsStore[iName].name}}</div>
+      </div>
+    </div>
+
+    <div *ngIf="activeCard && isEditMode && !isNewCard" class="bottom-side-bar">
+      <div class="text">PROPERTIES</div>
+      <div class="controls">
+        <div class="item set-card-color">
+          <div class="text">Card color: </div>
+          <div class="colors">
+            <div [class.active]="activeCard['color'] === color" *ngFor="let color of colors;" class="color">
+              <div
+                (click)="setColor(color)"
+                class="example"
+                [ngStyle]="{'background': color.length === 1 ? color[0] : 'linear-gradient(138.41deg, '+color[0]+' -0.17%, '+color[1]+' 92.09%)'}"
+              >
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="item set-card-content-color">
+          <div class="text">Content color: </div>
+          <div class="colors">
+            <div [class.active]="activeCard['contentColor'] === color" *ngFor="let color of contentColors;" class="color">
+              <div
+                (click)="setContentColor(color)"
+                class="example"
+                [ngStyle]="{'background': color[0]}"
+              >
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="item layer-index">
+          <div class="text">Layer index: </div>
+          <div [class.active]="activeCard.layerIndex === i" class="index" (click)="setLayer(i)" *ngFor="let i of [1,2,3]">
+            {{i}}
+          </div>
+        </div>
+        <div class="item text-content">
+          <span class="content">Text: </span>
+          <input (input)="setText()" [(ngModel)]="text" type="text">
+        </div>
+        <div class="item font-size-select">
+          <label for="fontSize">Font size:</label>
+          <select (change)="setFontSize($event.target)" id="fontSize">
+            <option [selected]="activeCard['textFontSize'] === fs" *ngFor="let fs of fontSizes" [attr.value]="fs">{{fs}}</option>
+          </select>
+        </div>
+        <div class="item text-position-select">
+          <label for="position">Text position:</label>
+          <select (change)="setTextPosition($event.target)" id="position">
+            <option [selected]="activeCard['textPosition'] === ps" *ngFor="let ps of positions" [attr.value]="ps">{{ps}}</option>
+          </select>
+        </div>
+        <div class="item edit-mode-select">
+          <label for="isEditMode">Edit mode:</label>
+          <input
+            id="isEditMode"
+            type="checkbox"
+            [(ngModel)]="isEditMode"/>
+        </div>
+      </div>
+      <!--  <div class="item text-position">-->
+      <!--    <div class="boxes">-->
+      <!--      <div (click)="setTextPosition('top_left')" [class.active]="isActiveTextPosition('top_left')" class="box top_left"></div>-->
+      <!--      <div (click)="setTextPosition('top_center')" [class.active]="isActiveTextPosition('top_center')" class="box top_center"></div>-->
+      <!--      <div (click)="setTextPosition('top_right')" [class.active]="isActiveTextPosition('top_right')" class="box top_right"></div>-->
+      <!--      <div (click)="setTextPosition('bottom_left')" [class.active]="isActiveTextPosition('bottom_left')" class="box bottom_left"></div>-->
+      <!--      <div (click)="setTextPosition('bottom_center')" [class.active]="isActiveTextPosition('bottom_center')" class="box bottom_center"></div>-->
+      <!--      <div (click)="setTextPosition('bottom_right')" [class.active]="isActiveTextPosition('bottom_right')" class="box bottom_right"></div>-->
+      <!--      <div class="skeleton"></div>-->
+      <!--    </div>-->
+      <!--  </div>-->
+    </div>
+
+    <div *ngIf="isShowTemplates" class="templates">
+      <h3>Templates</h3>
+      <div class="wrapper">
+        <div  class="template template_1">
+          <div (click)="addAccessToPalette()" class="lines">
+          </div>
+          <div class="text">Empty template</div>
+        </div>
+        <div class="template template_2">
+          <div (click)="addAccess()" class="lines">
+          </div>
+          <div class="text">Empty template</div>
+        </div>
+        <div class="template template_3">
+          <div (click)="addAccess()" class="lines">
+          </div>
+          <div class="text">Empty template</div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isPaletteSettings" class="template-settings">
+      <h3>Template settings</h3>
+      <div class="settings">
+
+        <div class="setting font">
+          <label for="font">Font size:</label>
+          <select id="font">
+            <option>Roboto</option>
+            <option>Open Sans</option>
+            <option>Anek Latin</option>
+          </select>
+        </div>
+
+        <div class="setting background-img">
+        </div>
+
+        <div class="setting custom-palette"></div>
+
+      </div>
+      <button (click)="addAccess()">Apply</button>
+    </div>
+  </div>
+</div>
+
